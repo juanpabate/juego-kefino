@@ -44,11 +44,11 @@ const keys = {};
 
 function spawnEnemies() {
   enemies = [];
-  const rows = 5;
-  const cols = 10;
+  const rows = 4;
+  const cols = 8;
   const margin = 20;
-  const enemyWidth = 80;
-  const enemyHeight = 80;
+  const enemyWidth = 120;
+  const enemyHeight = 120;
   const totalWidth = cols * (enemyWidth + margin) - margin;
   const startX = (canvas.width - totalWidth) / 2;
   const startY = 50;
@@ -71,7 +71,7 @@ function updateEnemies() {
   let shouldReverse = false;
 
   // Ajustar velocidad en función del número de enemigos restantes
-  const speedMultiplier = 1 + (30 - enemies.length) * 0.8; // Ajusta como quieras
+  const speedMultiplier = 1 + (30 - enemies.length) * 0.5; // Ajusta como quieras
   const currentSpeed = baseEnemySpeed * speedMultiplier;
 
   enemies.forEach((e) => {
