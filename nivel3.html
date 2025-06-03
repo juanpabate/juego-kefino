@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Kefino - Final Boss</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        background: #000;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const keys = {};
+      const kefir = {
+        x: canvas.width / 2 - 40,
+        y: canvas.height - 200,
+        width: 180,
+        height: 180,
+        speed: 15,
+      };
+
+      const boss = {
+        img: new Image(),
+        x: canvas.width / 2 - 100,
+        y: 30,
+        width: 200,
+        height: 200,
+        speed: 4,
+        direction: 1,
+        life: 30,
+      };
+      boss.img.src = "Gusano.png";
+
+      const bacteriasSrc = ["ecoli.png", "clostridium.png", "salmonella.png"];
+      const bacterias = [];
+
+      const bullets = [];
+
+      const kefirImg = new Image();
+      kefirImg.src = "kefir.png";
+
+      const bulletImg = new Image();
+      bulletImg.src = "probiotico.png";
+
+      function spawnBacteria() {
+        const img = new Image();
+        img.src = bacteriasSrc[Math.floor(Math.random() * bacteriasSrc.length)];
+        bacterias.push({
+          img,
+          x: boss.x + boss.width / 2 - 30 + (Math.random() * 60 - 30),
+          y: boss.y + boss.height,
+          width: 100,
+          height: 100,
+          speed: 4,
+        });
+      }
+
+      function update() {
+        // Movimiento kefir
+        if (keys["ArrowLeft"] && kefir.x > 0) kefir.x -= kefir.speed;
+        if (keys["ArrowRight"] && kefir.x + kefir.width < canvas.width)
+          kefir.x += kefir.speed;
+
+        // Movimiento jefe (izq-der)
+        boss.x += boss.speed * boss.direction;
+        if (boss.x <= 0 || boss.x + boss.width >= canvas.width) {
+          boss.direction *= -1; // rebota
+        }
+
+        // Movimiento bacterias
+        bacterias.forEach((b) => (b.y += b.speed));
+
+        // Movimiento de disparos
+        bullets.forEach((b) => (b.y -= 10));
+
+        // Colisiones bala con jefe
+        for (let i = bullets.length - 1; i >= 0; i--) {
+          const b = bullets[i];
+          if (
+            b.x < boss.x + boss.width &&
+            b.x + b.width > boss.x &&
+            b.y < boss.y + boss.height &&
+            b.y + b.height > boss.y
+          ) {
+            bullets.splice(i, 1);
+            boss.life--;
+            if (boss.life <= 0) {
+              window.location.href = "lo-lograste.html";
+            }
+          }
+        }
+
+        // Colisiones bala con bacterias
+        for (let i = bacterias.length - 1; i >= 0; i--) {
+          const bac = bacterias[i];
+          for (let j = bullets.length - 1; j >= 0; j--) {
+            const b = bullets[j];
+            if (
+              b.x < bac.x + bac.width &&
+              b.x + b.width > bac.x &&
+              b.y < bac.y + bac.height &&
+              b.y + b.height > bac.y
+            ) {
+              bacterias.splice(i, 1);
+              bullets.splice(j, 1);
+              break;
+            }
+          }
+        }
+
+        // Colisión bacterias con kefir
+        for (const bac of bacterias) {
+          if (
+            bac.x < kefir.x + kefir.width &&
+            bac.x + bac.width > kefir.x &&
+            bac.y < kefir.y + kefir.height &&
+            bac.y + bac.height > kefir.y
+          ) {
+            window.location.href = "nivel3-perdiste.html";
+          }
+        }
+
+        // Limpiar fuera de pantalla
+        for (let i = bullets.length - 1; i >= 0; i--) {
+          if (bullets[i].y + bullets[i].height < 0) bullets.splice(i, 1);
+        }
+        for (let i = bacterias.length - 1; i >= 0; i--) {
+          if (bacterias[i].y > canvas.height) bacterias.splice(i, 1);
+        }
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Boss
+        ctx.drawImage(boss.img, boss.x, boss.y, boss.width, boss.height);
+
+        // Barra de vida
+        ctx.fillStyle = "red";
+        ctx.fillRect(20, 20, 300, 20);
+        ctx.fillStyle = "green";
+        ctx.fillRect(20, 20, (300 * boss.life) / 30, 20);
+        ctx.strokeStyle = "white";
+        ctx.strokeRect(20, 20, 300, 20);
+
+        // Kefir
+        ctx.drawImage(kefirImg, kefir.x, kefir.y, kefir.width, kefir.height);
+
+        // Bacterias
+        bacterias.forEach((b) => {
+          ctx.drawImage(b.img, b.x, b.y, b.width, b.height);
+        });
+
+        // Balas
+        bullets.forEach((b) => {
+          ctx.drawImage(bulletImg, b.x, b.y, b.width, b.height);
+        });
+      }
+
+      function gameLoop() {
+        update();
+        draw();
+        requestAnimationFrame(gameLoop);
+      }
+
+      setInterval(spawnBacteria, 1000); // jefe lanza cada 1s
+
+      document.addEventListener("keydown", (e) => {
+        keys[e.key] = true;
+        if (e.key === " ") {
+          bullets.push({
+            x: kefir.x + kefir.width / 2 - 10,
+            y: kefir.y,
+            width: 50,
+            height: 50,
+          });
+        }
+      });
+
+      document.addEventListener("keyup", (e) => {
+        keys[e.key] = false;
+      });
+
+      gameLoop();
+    </script>
+  </body>
+</html>

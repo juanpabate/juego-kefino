@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Kefino - Nivel 1</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        background: black;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      resizeCanvas();
+      window.addEventListener("resize", resizeCanvas);
+
+      const kefinoImg = new Image();
+      kefinoImg.src = "botella-canasta.png";
+
+      const goodFoods = [
+        "Banano.png",
+        "Coco.png",
+        "Fresa.png",
+        "Limón.png",
+        "Naranja.png",
+        "Pimenton.png",
+      ].map((src) => {
+        const img = new Image();
+        img.src = src;
+        return img;
+      });
+
+      const badFoods = [
+        "Chocolate.png",
+        "Chorizo.png",
+        "Crispetas.png",
+        "Dona.png",
+        "Gaseosa.png",
+        "Papitas.png",
+        "Perro.png",
+        "Sandwich.png",
+      ].map((src) => {
+        const img = new Image();
+        img.src = src;
+        return img;
+      });
+
+      const player = {
+        x: canvas.width / 2 - 50,
+        y: canvas.height - 190,
+        width: 200,
+        height: 200,
+        speed: 15,
+      };
+
+      let score = 5;
+      const keys = {};
+      const fallingItems = [];
+
+      function spawnItem() {
+        const isGood = Math.random() < 0.6; // 60% comida buena
+        const img = isGood
+          ? goodFoods[Math.floor(Math.random() * goodFoods.length)]
+          : badFoods[Math.floor(Math.random() * badFoods.length)];
+
+        fallingItems.push({
+          x: Math.random() * (canvas.width - 60),
+          y: -60,
+          width: 60,
+          height: 60,
+          img: img,
+          isGood: goodFoods.includes(img),
+        });
+      }
+
+      function update() {
+        if (keys["ArrowLeft"] && player.x > 0) player.x -= player.speed;
+        if (keys["ArrowRight"] && player.x + player.width < canvas.width)
+          player.x += player.speed;
+
+        fallingItems.forEach((item) => (item.y += 8));
+
+        // Colisiones
+        for (let i = fallingItems.length - 1; i >= 0; i--) {
+          const item = fallingItems[i];
+          if (
+            item.x < player.x + player.width &&
+            item.x + item.width > player.x &&
+            item.y < player.y + player.height &&
+            item.y + item.height > player.y
+          ) {
+            if (item.isGood) {
+              score += 1;
+            } else {
+              score -= 3;
+            }
+            fallingItems.splice(i, 1);
+          } else if (item.y > canvas.height) {
+            fallingItems.splice(i, 1); // eliminar si sale de la pantalla
+          }
+        }
+
+        if (score <= 0) {
+          window.location.href = "nivel1-perdiste.html";
+        }
+
+        if (score >= 30) {
+          window.location.href = "nivel2-instrucciones.html";
+        }
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.drawImage(
+          kefinoImg,
+          player.x,
+          player.y,
+          player.width,
+          player.height
+        );
+
+        fallingItems.forEach((item) => {
+          ctx.drawImage(item.img, item.x, item.y, item.width, item.height);
+        });
+
+        // Score
+        ctx.font = "30px Arial";
+        ctx.fillStyle = "white";
+        ctx.fillText("Puntos: " + score, 20, 40);
+      }
+
+      function gameLoop() {
+        update();
+        draw();
+        requestAnimationFrame(gameLoop);
+      }
+
+      setInterval(spawnItem, 1000); // Aparece uno cada segundo
+      document.addEventListener("keydown", (e) => (keys[e.key] = true));
+      document.addEventListener("keyup", (e) => (keys[e.key] = false));
+
+      gameLoop();
+    </script>
+  </body>
+</html>
