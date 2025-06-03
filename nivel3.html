@@ -54,6 +54,9 @@
       const bulletImg = new Image();
       bulletImg.src = "probiotico.png";
 
+      const fondo = new Image();
+      fondo.src = "nivel3-fondo.jpeg";
+
       function spawnBacteria() {
         const img = new Image();
         img.src = bacteriasSrc[Math.floor(Math.random() * bacteriasSrc.length)];
@@ -143,6 +146,8 @@
 
       function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        //Fondo
+        ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
 
         // Boss
         ctx.drawImage(boss.img, boss.x, boss.y, boss.width, boss.height);

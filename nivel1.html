@@ -2,7 +2,7 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <title>Kefino - Nivel 1</title>
+    <title>Kefino Defender</title>
     <style>
       body {
         margin: 0;
@@ -29,6 +29,9 @@
       resizeCanvas();
       window.addEventListener("resize", resizeCanvas);
 
+      const fondo = new Image();
+      fondo.src = "nivel1-fondo.jpeg";
+
       const kefinoImg = new Image();
       kefinoImg.src = "botella-canasta.png";
 
@@ -50,7 +53,7 @@
         "Chorizo.png",
         "Crispetas.png",
         "Dona.png",
-        "Gaseosa.png",
+        // "Gaseosa.png",
         "Papitas.png",
         "Perro.png",
         "Sandwich.png",
@@ -62,7 +65,7 @@
 
       const player = {
         x: canvas.width / 2 - 50,
-        y: canvas.height - 190,
+        y: canvas.height - 200,
         width: 200,
         height: 200,
         speed: 15,
@@ -126,6 +129,9 @@
 
       function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        //Fondo
+        ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
 
         ctx.drawImage(
           kefinoImg,

@@ -199,7 +199,7 @@ const ctx = canvas.getContext("2d");
 let baseEnemySpeed = 1;
 
 const backgroundImg = new Image();
-backgroundImg.src = "intestino.jpeg";
+backgroundImg.src = "nivel2-fondo.jpeg";
 
 const kefirImg = new Image();
 kefirImg.src = "kefir.png";
